@@ -1,0 +1,176 @@
+from cmath import inf
+from statistics import mean
+from numpy import array
+from math import sqrt, atan2, degrees
+from copy import copy
+import rospy
+from tf.transformations import euler_from_quaternion
+from scipy.spatial import Delaunay
+from queue import SimpleQueue
+
+from asurt_msgs.msg import LandmarkArray
+from geometry_msgs.msg import Pose
+from geometry_msgs.msg import Quaternion
+
+from cone import Cone
+from waypoint import Waypoint
+from path import Path
+from car_pose import CarPose
+
+YELLOW_CONE_STYLE = rospy.get_param("/planner/yellow_cone_style", 1)
+BLUE_CONE_STYLE = rospy.get_param("/planner/blue_cone_style", 0)
+ORANGE_CONE_STYLE = rospy.get_param("/planner/orange_cone_style", 2)
+BIG_CONE_STYLE = rospy.get_param("/planner/big_cone_style", 3)
+UNKNOWN_CONE_STYLE = rospy.get_param("/planner/unknown_cone_style", 4)
+
+CONE_FIELD_OF_VIEW = rospy.get_param("planner/cone_field_of_view", 180)
+CONE_DISTANCE = rospy.get_param("planner/cone_distance", 20)
+WAYPOINT_FIELD_OF_VIEW = rospy.get_param("planner/waypoint_field_of_view", 120)
+WAYPOINT_DISTANCE = rospy.get_param("planner/waypoint_distance", 5)
+MAX_SEARCH_ITERATIONS = rospy.get_param("planner/max_search_iterations", 10)
+PATH_QUEUE_LIMIT = rospy.get_param("planner/path_queue_limit", 10)
+MAX_WAYPOINTS_PER_PATH = rospy.get_param("Planner/max_waypoints_per_path", 10)
+
+class Map:
+    waypoints: list = list() #Private
+    pose: CarPose = CarPose() #Private
+
+    #Public Functions
+    def __init__(self, landmarks: LandmarkArray, pose: Pose):
+        cones: list = [Cone(landmark) for landmark in landmarks]
+        self.pose.x = pose.position.x
+        self.pose.y = pose.position.y
+        self.pose.heading = self.quatrenion_to_heading(pose.orientation)
+        cones = self.filter_local(cones, self.pose, CONE_FIELD_OF_VIEW, CONE_DISTANCE)
+        self.waypoints = self.triangulate(cones)
+
+
+    def get_path(self) -> Path:
+        if (len(self.waypoints) == 0):
+            return None
+        paths: SimpleQueue = SimpleQueue() #queue to store possible paths
+        #Get waypoints in range of car (at appropriate distance and appropriate angle) to use as starting point for path search
+        starting_waypoints: list = self.filter_local(self.waypoints, self.pose, WAYPOINT_FIELD_OF_VIEW, WAYPOINT_DISTANCE)
+        waypoint: Waypoint
+        for waypoint in starting_waypoints:
+            new_path: Path = Path([waypoint])
+            paths.put(new_path) #Enqueue new path starting from waypoint
+        for _ in range(MAX_SEARCH_ITERATIONS):
+            no_new_paths: bool = True
+            size: int = paths.qsize()
+            for _ in range(size): #Dequeue current paths and add waypoints to them
+                current_path: Path = paths.get()
+                if (len(current_path.waypoints) > MAX_WAYPOINTS_PER_PATH):
+                    paths.put(current_path)
+                    continue
+                last_waypoint: Waypoint = current_path.get_last_waypoint() #Get last waypoint of path
+		        #Get waypoints in range of last waypoint (as if car reached that waypoint)
+                current_possible_waypoints: list = self.filter_local(self.waypoints, last_waypoint, WAYPOINT_FIELD_OF_VIEW, WAYPOINT_DISTANCE)
+		        #Build new paths each corresponding to a taking one of the waypoints as next and enqueue them in paths queue
+                for waypoint in current_possible_waypoints:
+                    if (waypoint not in current_path.waypoints):
+                        new_path: Path = Path(copy(current_path.waypoints))
+                        new_path.add_waypoint(waypoint)
+                        paths.put(new_path)
+                        no_new_paths = False
+                if (no_new_paths):
+                    paths.put(current_path)
+            if (paths.qsize() > PATH_QUEUE_LIMIT):
+                paths = self.prune_paths(paths) #Prune paths queue to improve performance by removing least likely paths
+            if (no_new_paths):
+                break
+
+
+        #Finding path with highest posterior
+        best_path: Path = None
+        highest_posterior: float = -inf #Calculate posterior of path according to cost function representing prior and likelihood
+        while(not paths.empty()):
+            current_path: Path = paths.get()
+            current_posterior: float = current_path.get_posterior()
+            if (current_posterior > highest_posterior):
+                    best_path = current_path
+                    highest_posterior = current_posterior
+        
+
+        return best_path
+
+    #Private Functions
+    @staticmethod
+    #Filters passed landmarks(cones or waypoints) to those in view of pose, returns array containing landmarks in view only
+    #Returned landmarks are in their original frame
+    #Assumes passed landmarks are in frame of pose
+    def filter_local(landmarks: list, pose: CarPose, field_of_view: float, distance: float) -> list:
+        filtered_landmarks = list()
+        landmark: Waypoint
+        for landmark in landmarks:
+            landmark_distance = sqrt(((landmark.x - pose.x) ** 2) + ((landmark.y - pose.y) ** 2))
+            heading_to_landmark = degrees(atan2(landmark.y - pose.y, landmark.x - pose.x))
+            heading_difference = abs(heading_to_landmark - pose.heading)
+            if (heading_difference > 180):
+                heading_difference = 360 - heading_difference
+            if ((0.1 < landmark_distance) and (landmark_distance < distance)):
+                if (heading_difference < (field_of_view/2)):
+                    filtered_landmarks.append(landmark)
+        return filtered_landmarks
+                
+
+    
+    @staticmethod
+    def triangulate(landmarks: list) -> list:
+        cone_array = [[landmark.x, landmark.y] for landmark in landmarks]
+        triangulation = Delaunay(cone_array)
+        simplices = triangulation.simplices
+        edges = list()
+        simplex: array
+        for simplex in simplices:
+            if (not Map.edge_in_edges(edges, (simplex[0], simplex[1]))):
+                edges.append((simplex[0], simplex[1]))
+            if (not Map.edge_in_edges(edges, (simplex[0], simplex[2]))):
+                edges.append((simplex[0], simplex[2]))
+            if (not Map.edge_in_edges(edges, (simplex[1], simplex[2]))):
+                edges.append((simplex[1], simplex[2]))
+        waypoints = list()
+        edge: tuple
+        for edge in edges:
+            landmark1: Cone = landmarks[edge[0]]
+            landmark2: Cone = landmarks[edge[1]]
+            if ((landmark1.color == BLUE_CONE_STYLE or landmark1.color == YELLOW_CONE_STYLE) and (landmark2.color == BLUE_CONE_STYLE or landmark2.color == YELLOW_CONE_STYLE) and (landmark1.color != landmark2.color)):
+                if (landmark1.color == YELLOW_CONE_STYLE):
+                    waypoints.append(Waypoint(right_cone = landmark1, left_cone = landmark2))
+                else:
+                    waypoints.append(Waypoint(right_cone = landmark2, left_cone = landmark1))
+        return waypoints
+
+    @staticmethod
+    def quatrenion_to_heading(orientation: Quaternion) -> float:
+        quatrenion = (orientation.x, orientation.y, orientation.z, orientation.w)
+        return degrees(euler_from_quaternion(quatrenion)[2])
+
+    @staticmethod
+    def make_local(landmarks: list, pose: CarPose) -> list:
+        local_landmarks = copy.deepcopy(landmarks)
+        landmark: Waypoint
+        for landmark in local_landmarks:
+            landmark.to_frame(pose)
+        return local_landmarks
+
+    @staticmethod
+    def prune_paths(paths: SimpleQueue) -> SimpleQueue:
+        paths_list = list()
+        pruned_paths = SimpleQueue()
+        while(not paths.empty()):
+            paths_list.append(paths.get())
+        posteriors = [path.get_posterior() for path in paths_list]
+        mean_posterior = mean(posteriors)
+        for i in range(len(posteriors)):
+            if (posteriors[i] > mean_posterior):
+                pruned_paths.put(paths_list[i])
+        return pruned_paths
+
+    @staticmethod
+    def edge_in_edges(edges: list(), edge: tuple()) -> bool:
+        list_edge: tuple
+        for list_edge in edges:
+            if ((list_edge[0] == edge[0] and list_edge[1] == edge[1]) or (list_edge[1] == edge[0] and list_edge[0] == edge[1])):
+                return True
+        return False
