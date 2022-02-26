@@ -4,7 +4,7 @@
 	<param name="use_sim_time" value="true"/>
 
     <!--Trackdrive Nodes-->
-	<node name="path_planner" pkg="fs_planning" type="path_planner.py" output="screen"/>
+	<node name="path_planner" pkg="fs_planning-2022" type="path_planner.py" output="screen"/>
 	<!--<node name="path_planner_wv" pkg="fs_planning" type="path_planner_wv.py" output="screen"/>-->
 	<!--<node name="path_planner_planC" pkg="fs_planning" type="path_planner_planC.py" output="screen"/>-->
 
