@@ -17,11 +17,11 @@ from waypoint import Waypoint
 from path import Path
 from car_pose import CarPose
 
-YELLOW_CONE_STYLE = rospy.get_param("/planner/yellow_cone_style", 1)
-BLUE_CONE_STYLE = rospy.get_param("/planner/blue_cone_style", 0)
-ORANGE_CONE_STYLE = rospy.get_param("/planner/orange_cone_style", 2)
-BIG_CONE_STYLE = rospy.get_param("/planner/big_cone_style", 3)
-UNKNOWN_CONE_STYLE = rospy.get_param("/planner/unknown_cone_style", 4)
+YELLOW_CONE_STYLE = rospy.get_param("planner/yellow_cone_style", 1)
+BLUE_CONE_STYLE = rospy.get_param("planner/blue_cone_style", 0)
+ORANGE_CONE_STYLE = rospy.get_param("planner/orange_cone_style", 2)
+BIG_CONE_STYLE = rospy.get_param("planner/big_cone_style", 3)
+UNKNOWN_CONE_STYLE = rospy.get_param("planner/unknown_cone_style", 4)
 
 CONE_FIELD_OF_VIEW = rospy.get_param("planner/cone_field_of_view", 180)
 CONE_DISTANCE = rospy.get_param("planner/cone_distance", 20)
@@ -29,7 +29,7 @@ WAYPOINT_FIELD_OF_VIEW = rospy.get_param("planner/waypoint_field_of_view", 180)
 WAYPOINT_DISTANCE = rospy.get_param("planner/waypoint_distance", 6)
 MAX_SEARCH_ITERATIONS = rospy.get_param("planner/max_search_iterations", 10)
 PATH_QUEUE_LIMIT = rospy.get_param("planner/path_queue_limit", 10)
-MAX_WAYPOINTS_PER_PATH = rospy.get_param("Planner/max_waypoints_per_path", 10)
+MAX_WAYPOINTS_PER_PATH = rospy.get_param("planner/max_waypoints_per_path", 10)
 
 class Map:
     waypoints: list = list() #Private
@@ -40,7 +40,12 @@ class Map:
         cones: list = [Cone(landmark) for landmark in landmarks]
         self.pose.x = pose.position.x
         self.pose.y = pose.position.y
-        self.pose.heading = self.quatrenion_to_heading(pose.orientation)
+
+        #Temporary for IPG
+        self.pose.heading = pose.position.z
+        #self.pose.heading = self.quatrenion_to_heading(pose.orientation)
+        
+        
         cones = self.filter_local(cones, self.pose, CONE_FIELD_OF_VIEW, CONE_DISTANCE)
         self.waypoints = self.triangulate(cones)
 

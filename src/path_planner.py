@@ -12,22 +12,20 @@ from map import Map
 from waypoint import Waypoint
 from path import Path
 
-MAP_TOPIC = rospy.get_param("/planner/map_topic", "airsim/Cones")
-POSE_TOPIC = rospy.get_param("/planner/pose_topic", "fast_slam2/GlobalPose")
-WAYPOINTS_TOPIC = rospy.get_param("/planner/waypoints_topic", "waypoints_topic")
-REAL_TIME_GLOBAL_PLOTTING = rospy.get_param("/planner/real_time_global_plotting", True)
-MAX_DISTANCE_OF_VIEW = rospy.get_param("/planner/max_distance_of_view", 15)
+MAP_TOPIC = rospy.get_param("planner/map_topic", "airsim/Cones")
+POSE_TOPIC = rospy.get_param("planner/pose_topic", "fast_slam2/GlobalPose")
+WAYPOINTS_TOPIC = rospy.get_param("planner/waypoints_topic", "waypoints_topic")
+REAL_TIME_GLOBAL_PLOTTING = rospy.get_param("planner/real_time_global_plotting", True)
+MAX_DISTANCE_OF_VIEW = rospy.get_param("planner/max_distance_of_view", 15)
 
 rospy.init_node('path_planner')
 waypoints_pub = rospy.Publisher(WAYPOINTS_TOPIC, navPath, queue_size=1)
 
-
-"""For Testing"""
-YELLOW_CONE_STYLE = rospy.get_param("/planner/yellow_cone_style", 1)
-BLUE_CONE_STYLE = rospy.get_param("/planner/blue_cone_style", 0)
-ORANGE_CONE_STYLE = rospy.get_param("/planner/orange_cone_style", 2)
-BIG_CONE_STYLE = rospy.get_param("/planner/big_cone_style", 3)
-UNKNOWN_CONE_STYLE = rospy.get_param("/planner/unknown_cone_style", 4)
+BLUE_CONE_STYLE = rospy.get_param("planner/blue_cone_style", 0)
+YELLOW_CONE_STYLE = rospy.get_param("planner/yellow_cone_style", 1)
+ORANGE_CONE_STYLE = rospy.get_param("planner/orange_cone_style", 2)
+BIG_CONE_STYLE = rospy.get_param("planner/big_cone_style", 3)
+UNKNOWN_CONE_STYLE = rospy.get_param("planner/unknown_cone_style", 4)
 
 
 while not rospy.is_shutdown():
