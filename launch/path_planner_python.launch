@@ -2,8 +2,6 @@
 <launch>
     <!--Nodes-->
 	<node name="path_planner" pkg="fs_planning-2022" type="path_planner.py" output="screen"/>
-    <node name="path_planner" pkg="fs_planning-2022" type="ipg_mediator.py" output="screen"/>
-    <node name="path_planner" pkg="fs_planning-2022" type="airsim_mediator.py" output="screen"/>
 
     <!--Topics-->
     <param name="planner/map_topic" value="airsim/Cones"/> 
