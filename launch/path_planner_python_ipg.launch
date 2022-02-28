@@ -1,5 +1,7 @@
 <?xml version="1.0"?>
 <launch>
+    <param name="use_sim_time" value="true"/>
+
     <!--Nodes-->
 	<node name="path_planner" pkg="fs_planning-2022" type="path_planner.py" output="screen"/>
     <node name="ipg_mediator" pkg="fs_planning-2022" type="ipg_mediator.py" output="screen"/>
