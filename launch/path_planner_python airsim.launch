@@ -17,8 +17,8 @@
     <param name="planner/unkown_cone_style" value="4"/>
     
     <!--Mediator Parameters-->
-    <param name="planner/add_noise" value="false">
-    <param name="planner/plotting" value="false">
+    <param name="planner/add_noise" value="false"/>
+    <param name="planner/plotting" value="false"/>
     <param name="planner/mediator_map_topic" value="airsim/Cones"/> <!--Topic to which mediator node subscribes for cones-->
     <param name="planner/mediator_pose_topic" value="airsim/KinematicOdometry"/> <!--Topic to which mediator node subscribes for pose-->
 
