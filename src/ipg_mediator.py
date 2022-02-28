@@ -46,7 +46,7 @@ while not rospy.is_shutdown():
 
     landmarks = []
     marker: Marker
-    for marker in ipg_markers:
+    for marker in ipg_markers.markers:
         color: int = UNKNOWN_CONE_STYLE
         if (marker.color.r > 0.9 and marker.color.g > 0.9 and marker.color.b < 0.1):
             color = YELLOW_CONE_STYLE
