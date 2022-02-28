@@ -42,8 +42,8 @@ class Map:
         self.pose.y = pose.position.y
 
         #Temporary for IPG
-        self.pose.heading = pose.position.z
-        #self.pose.heading = self.quatrenion_to_heading(pose.orientation)
+        #self.pose.heading = pose.position.z
+        self.pose.heading = self.quatrenion_to_heading(pose.orientation)
         
         
         cones = self.filter_local(cones, self.pose, CONE_FIELD_OF_VIEW, CONE_DISTANCE)

@@ -1,6 +1,5 @@
 #! /usr/bin/env python3
 import rospy
-import numpy as np
 import matplotlib.pyplot as plt
 
 from geometry_msgs.msg import Point, PoseStamped
@@ -11,9 +10,9 @@ from sensor_msgs.msg import Imu
 
 MEDIATOR_MAP_TOPIC = rospy.get_param("planner/mediator_map_topic", "/ObjectList")
 MEDIATOR_POSE_TOPIC = rospy.get_param("planner/mediator_pose_topic", "/IMU")
-MAP_TOPIC = rospy.get_param("planner/map_topic", "planner/cones")
-POSE_TOPIC = rospy.get_param("planner/pose_topic", "planner/pose")
-WAYPOINTS_TOPIC = rospy.get_param("planner/waypoints_topic", "planner/path")
+MAP_TOPIC = rospy.get_param("planner/map_topic", "/planner/cones")
+POSE_TOPIC = rospy.get_param("planner/pose_topic", "/planner/pose")
+WAYPOINTS_TOPIC = rospy.get_param("planner/waypoints_topic", "/planner/path")
 ADD_NOISE = rospy.get_param("planner/add_noise", False)
 PLOTTING = rospy.get_param("planner/plotting", False)
 
@@ -43,6 +42,10 @@ while not rospy.is_shutdown():
     car_pose.pose.pose.position.x = 0.0
     car_pose.pose.pose.position.y = 0.0
     car_pose.pose.pose.position.z = 0.0
+    car_pose.pose.pose.orientation.w = 0.0
+    car_pose.pose.pose.orientation.x = 0.0
+    car_pose.pose.pose.orientation.y = 0.0
+    car_pose.pose.pose.orientation.z = 0.0
 
     landmarks = []
     marker: Marker
@@ -76,7 +79,7 @@ while not rospy.is_shutdown():
         plt.plot(current_global_right_cones_x, current_global_right_cones_y, 'o', color='yellow')
         plt.plot(current_global_left_cones_x, current_global_left_cones_y, 'o', color='blue')
 
-        wayopoint: PoseStamped
+        waypoint: PoseStamped
         for waypoint in path.poses:
             plt.plot(waypoint.pose.position.x, waypoint.pose.position.y, 'x')
 

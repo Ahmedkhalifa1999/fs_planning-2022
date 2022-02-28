@@ -7,9 +7,9 @@
     <node name="airsim_mediator" pkg="fs_planning-2022" type="airsim_mediator.py" output="screen"/>
 
     <!--Topics-->
-    <param name="planner/map_topic" value="airsim/Cones"/> 
-    <param name="planner/pose_topic" value="airsim/KinematicOdometry"/>
-    <param name="planner/waypoints_topic" value="fast_slam2/ConeGlobalMap"/> 
+    <param name="planner/map_topic" value="/planner/cones"/> 
+    <param name="planner/pose_topic" value="/planner/pose"/>
+    <param name="planner/waypoints_topic" value="/planner/path"/> 
 
     <!--Cones Styles-->
     <param name="planner/blue_cone_style" value="0"/>
