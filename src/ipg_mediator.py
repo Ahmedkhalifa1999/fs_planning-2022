@@ -59,9 +59,8 @@ while not rospy.is_shutdown():
     cones_pub.publish(landmarks)
     pose_pub.publish(car_pose)
 
-    path: navPath = rospy.wait_for_message(WAYPOINTS_TOPIC, navPath)
-
     if PLOTTING:
+        path: navPath = rospy.wait_for_message(WAYPOINTS_TOPIC, navPath)
         current_global_right_cones_x = []
         current_global_right_cones_y = []
         current_global_left_cones_x = []
