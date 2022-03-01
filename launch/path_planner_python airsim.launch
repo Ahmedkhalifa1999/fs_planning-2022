@@ -3,8 +3,8 @@
     <param name="use_sim_time" value="true"/>
 
     <!--Nodes-->
-	<node name="path_planner" pkg="fs_planning-2022" type="path_planner.py" output="screen"/>
     <node name="airsim_mediator" pkg="fs_planning-2022" type="airsim_mediator.py" output="screen"/>
+	<node name="path_planner" pkg="fs_planning-2022" type="path_planner.py" output="screen"/>
 
     <!--Topics-->
     <param name="planner/map_topic" value="/planner/cones"/> 

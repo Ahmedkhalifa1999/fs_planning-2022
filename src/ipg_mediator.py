@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 import rospy
 import matplotlib.pyplot as plt
+import time
 
 from geometry_msgs.msg import Point, PoseStamped
 from nav_msgs.msg import Odometry, Path as navPath
@@ -59,8 +60,8 @@ while not rospy.is_shutdown():
                          type = color, identifier = None))
     landmarks = LandmarkArray(landmarks = landmarks)
 
-    cones_pub.publish(landmarks)
     pose_pub.publish(car_pose)
+    cones_pub.publish(landmarks)
 
     if PLOTTING:
         path: navPath = rospy.wait_for_message(WAYPOINTS_TOPIC, navPath)

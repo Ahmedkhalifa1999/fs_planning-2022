@@ -21,9 +21,7 @@ UNKNOWN_CONE_STYLE = rospy.get_param("planner/unknown_cone_style", 4)
 
 rospy.init_node('path_planner')
 
-
 waypoints_pub = rospy.Publisher(WAYPOINTS_TOPIC, navPath, queue_size=1)
-
 
 while not rospy.is_shutdown():
     

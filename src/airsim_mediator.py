@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 import rospy
 import matplotlib.pyplot as plt
+import time
 
 from geometry_msgs.msg import Point, PoseStamped
 from nav_msgs.msg import Odometry, Path as navPath
@@ -21,7 +22,7 @@ BIG_CONE_STYLE = rospy.get_param("planner/big_cone_style", 3)
 UNKNOWN_CONE_STYLE = rospy.get_param("planner/unknown_cone_style", 4)
 
 
-rospy.init_node('path_planning_ipg_mediator')
+rospy.init_node('path_planning_airsim_mediator')
 
 cones_pub = rospy.Publisher(MAP_TOPIC, LandmarkArray, queue_size=1)
 pose_pub = rospy.Publisher(POSE_TOPIC, Odometry, queue_size=1)
@@ -32,11 +33,10 @@ while not rospy.is_shutdown():
     airsim_landmarks: LandmarkArray = rospy.wait_for_message(MEDIATOR_MAP_TOPIC, LandmarkArray)
     
     car_pose = airsim_car_pose
-
     landmarks = airsim_landmarks
 
-    cones_pub.publish(landmarks)
     pose_pub.publish(car_pose)
+    cones_pub.publish(landmarks)
 
     if PLOTTING:
         path: navPath = rospy.wait_for_message(WAYPOINTS_TOPIC, navPath)
