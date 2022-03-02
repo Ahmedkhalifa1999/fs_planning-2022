@@ -1,10 +1,8 @@
 #! /usr/bin/env python3
 import rospy
-import matplotlib.pyplot as plt
-import time
 
-from geometry_msgs.msg import Point, PoseStamped
-from nav_msgs.msg import Odometry, Path as navPath
+from geometry_msgs.msg import Point
+from nav_msgs.msg import Odometry
 from asurt_msgs.msg import LandmarkArray, Landmark
 from visualization_msgs.msg import Marker, MarkerArray
 from sensor_msgs.msg import Imu
@@ -15,7 +13,6 @@ MAP_TOPIC = rospy.get_param("planner/map_topic", "/planner/cones")
 POSE_TOPIC = rospy.get_param("planner/pose_topic", "/planner/pose")
 WAYPOINTS_TOPIC = rospy.get_param("planner/waypoints_topic", "/planner/path")
 ADD_NOISE = rospy.get_param("planner/add_noise", False)
-PLOTTING = rospy.get_param("planner/plotting", False)
 
 BLUE_CONE_STYLE = rospy.get_param("planner/blue_cone_style", 0)
 YELLOW_CONE_STYLE = rospy.get_param("planner/yellow_cone_style", 1)
@@ -62,28 +59,3 @@ while not rospy.is_shutdown():
 
     pose_pub.publish(car_pose)
     cones_pub.publish(landmarks)
-
-    if PLOTTING:
-        path: navPath = rospy.wait_for_message(WAYPOINTS_TOPIC, navPath)
-        current_global_right_cones_x = []
-        current_global_right_cones_y = []
-        current_global_left_cones_x = []
-        current_global_left_cones_y = []
-        landmark: Landmark
-        for landmark in landmarks.landmarks:
-            if (landmark.type == YELLOW_CONE_STYLE):
-                current_global_right_cones_x.append(landmark.position.x)
-                current_global_right_cones_y.append(landmark.position.y)
-            elif (landmark.type == BLUE_CONE_STYLE):
-                current_global_left_cones_x.append(landmark.position.x)
-                current_global_left_cones_y.append(landmark.position.y)
-        plt.plot(current_global_right_cones_x, current_global_right_cones_y, 'o', color='yellow')
-        plt.plot(current_global_left_cones_x, current_global_left_cones_y, 'o', color='blue')
-
-        waypoint: PoseStamped
-        for waypoint in path.poses:
-            plt.plot(waypoint.pose.position.x, waypoint.pose.position.y, 'x')
-
-        plt.plot(car_pose.pose.pose.position.x, car_pose.pose.pose.position.y, 'D')
-        plt.pause(0.001)
-        plt.cla()
