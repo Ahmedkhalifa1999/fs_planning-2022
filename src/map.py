@@ -28,8 +28,8 @@ CONE_DISTANCE = rospy.get_param("planner/cone_distance", 20)
 WAYPOINT_FIELD_OF_VIEW = rospy.get_param("planner/waypoint_field_of_view", 180)
 WAYPOINT_DISTANCE = rospy.get_param("planner/waypoint_distance", 6)
 MAX_SEARCH_ITERATIONS = rospy.get_param("planner/max_search_iterations", 10)
-PATH_QUEUE_LIMIT = rospy.get_param("planner/path_queue_limit", 10)
-MAX_WAYPOINTS_PER_PATH = rospy.get_param("planner/max_waypoints_per_path", 10)
+PATH_QUEUE_LIMIT = rospy.get_param("planner/path_queue_limit", 8)
+MAX_WAYPOINTS_PER_PATH = rospy.get_param("planner/max_waypoints_per_path", 8)
 
 class Map:
     waypoints: list = list() #Private
@@ -170,6 +170,8 @@ class Map:
         for i in range(len(posteriors)):
             if (posteriors[i] > mean_posterior):
                 pruned_paths.put(paths_list[i])
+        if (pruned_paths.qsize() > PATH_QUEUE_LIMIT):
+            pruned_paths = Map.prune_paths(pruned_paths)
         return pruned_paths
 
     @staticmethod

@@ -34,6 +34,7 @@ while not rospy.is_shutdown():
     output_path = navPath()
     if (best_path == None):
         print("No Path Found")
+        output_path.header.frame_id = 'map'
         waypoints_pub.publish(output_path)
     else:
         output_path.header.frame_id = 'map'
