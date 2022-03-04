@@ -43,8 +43,8 @@
     <param name="planner/cone_distance" value="20"/>
     <param name="planner/waypoint_field_of_view" value="180"/>
     <param name="planner/waypoint_distance" value="6"/> 
-    <param name="planner/path_queue_limit" value="10"/> 
-    <param name="planner/max_waypoints_per_path" value="10"/> 
+    <param name="planner/path_queue_limit" value="8"/> 
+    <param name="planner/max_waypoints_per_path" value="8"/> 
 
 </launch>
 
