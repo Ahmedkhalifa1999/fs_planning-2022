@@ -47,7 +47,7 @@ class Map:
         
         
         cones = self.filter_local(cones, self.pose, CONE_FIELD_OF_VIEW, CONE_DISTANCE)
-        self.waypoints = self.triangulate(cones)
+        self.waypoints = self.triangulate(cones, self.pose)
 
 
     def get_path(self) -> Path:
@@ -121,7 +121,7 @@ class Map:
 
     
     @staticmethod
-    def triangulate(landmarks: list) -> list:
+    def triangulate(landmarks: list, pose: CarPose) -> list:
         cone_array = [[landmark.x, landmark.y] for landmark in landmarks]
         triangulation = Delaunay(cone_array)
         simplices = triangulation.simplices
@@ -144,6 +144,73 @@ class Map:
                     waypoints.append(Waypoint(right_cone = landmark1, left_cone = landmark2))
                 else:
                     waypoints.append(Waypoint(right_cone = landmark2, left_cone = landmark1))
+
+        #Add extra waypoints constructed from like-colored cones
+        blue_cones = list()
+        yellow_cones = list()
+        landmark: Cone
+        for landmark in landmarks:
+            if (landmark.color == BLUE_CONE_STYLE):
+                blue_cones.append(landmark)
+            elif (landmark.color == YELLOW_CONE_STYLE):
+                yellow_cones.append(landmark)
+
+        closest_blue_cone: Cone
+        for cone in blue_cones:
+                min_distance = inf
+                cone_distance = sqrt(((cone.x - pose.x) ** 2) + ((cone.y - pose.y) ** 2))
+                if (cone_distance < min_distance):
+                    min_distance = cone_distance
+                    closest_blue_cone = cone
+        blue_cones.remove(closest_blue_cone)
+
+        closest_yellow_cone: Cone
+        for cone in yellow_cones:
+                min_distance = inf
+                cone_distance = sqrt(((cone.x - pose.x) ** 2) + ((cone.y - pose.y) ** 2))
+                if (cone_distance < min_distance):
+                    min_distance = cone_distance
+                    closest_yellow_cone = cone
+        yellow_cones.remove(closest_yellow_cone)
+
+        while (len(blue_cones) > 0):
+            second_blue_cone: Cone
+            for cone in blue_cones:
+                min_distance = inf
+                cone_distance = sqrt(((cone.x - closest_blue_cone.x) ** 2) + ((cone.y - closest_blue_cone.y) ** 2))
+                if (cone_distance < min_distance):
+                    min_distance = cone_distance
+                    second_blue_cone = cone
+            #Construct virtual cone
+            virtual_yellow_cone = Cone()
+            vector_mag = sqrt(((closest_blue_cone.y - second_blue_cone.y) ** 2) + ((closest_blue_cone.x - second_blue_cone.x) ** 2))
+            virtual_yellow_cone.x = ((closest_blue_cone.x + second_blue_cone.x) / 2) + (1.5 * ((closest_blue_cone.y - second_blue_cone.y) / vector_mag))
+            virtual_yellow_cone.y = ((closest_blue_cone.y + second_blue_cone.y) / 2) - (1.5 * ((closest_blue_cone.x - second_blue_cone.x) / vector_mag))
+            virtual_yellow_cone.color = YELLOW_CONE_STYLE
+            virtual_yellow_cone.color_confidence = 1.0 
+            waypoints.append(Waypoint(right_cone = virtual_yellow_cone, left_cone = closest_blue_cone))
+            blue_cones.remove(second_blue_cone)
+            closest_blue_cone = second_blue_cone
+
+        while (len(yellow_cones) > 0):
+            second_yellow_cone: Cone
+            for cone in yellow_cones:
+                min_distance = inf
+                cone_distance = sqrt(((cone.x - closest_yellow_cone.x) ** 2) + ((cone.y - closest_yellow_cone.y) ** 2))
+                if (cone_distance < min_distance):
+                    min_distance = cone_distance
+                    second_yellow_cone = cone
+            #Construct virtual cone
+            virtual_blue_cone = Cone()
+            vector_mag = sqrt(((closest_yellow_cone.y - second_yellow_cone.y) ** 2) + ((closest_yellow_cone.x - second_yellow_cone.x) ** 2))
+            virtual_blue_cone.x = ((closest_yellow_cone.x + second_yellow_cone.x) / 2) - (1.5 * ((closest_yellow_cone.y - second_yellow_cone.y) / vector_mag))
+            virtual_blue_cone.y = ((closest_yellow_cone.y + second_yellow_cone.y) / 2) + (1.5 * ((closest_yellow_cone.x - second_yellow_cone.x) / vector_mag))
+            virtual_blue_cone.color = BLUE_CONE_STYLE
+            virtual_blue_cone.color_confidence = 1.0 
+            waypoints.append(Waypoint(right_cone = closest_yellow_cone, left_cone = virtual_blue_cone))
+            yellow_cones.remove(second_yellow_cone)
+            closest_yellow_cone = second_yellow_cone
+            
         return waypoints
 
     @staticmethod

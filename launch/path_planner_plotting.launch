@@ -3,7 +3,7 @@
     <param name="use_sim_time" value="true"/>
 
     <!--Nodes-->
-	<node name="path_planner_plotting" pkg="fs_planning-2022" type="plotting.py" output="screen"/>
+	<node name="path_planner_plotting" pkg="fs_planning-2022" type="plotter.py" output="screen"/>
 
     <!--Topics-->
     <param name="planner/map_topic" value="/planner/cones"/> 

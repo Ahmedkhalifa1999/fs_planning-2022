@@ -7,7 +7,7 @@ class Cone:
     x: float = 0
     y: float = 0
     color: int = 4
-    color_confidence: float = 1
+    color_confidence: float = 1.0
 
     #Public Functions
     def __init__(self, landmark: Landmark = None):
@@ -15,7 +15,7 @@ class Cone:
             self.x = landmark.position.x
             self.y = landmark.position.y
             self.color = landmark.type
-            self.color_confidence = 1
+            self.color_confidence = 1.0
 
     def get_distance(self, x: float, y: float) -> float:
         return sqrt((self.x - x)**2 + (self.y - y)**2)
