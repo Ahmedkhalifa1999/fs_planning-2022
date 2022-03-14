@@ -138,7 +138,7 @@ class Map:
                 edges.append((simplex[1], simplex[2]))
         waypoints = list()
         edge: tuple
-        """
+        
         for edge in edges:
             landmark1: Cone = landmarks[edge[0]]
             landmark2: Cone = landmarks[edge[1]]
@@ -147,7 +147,7 @@ class Map:
                     waypoints.append(Waypoint(right_cone = landmark1, left_cone = landmark2))
                 else:
                     waypoints.append(Waypoint(right_cone = landmark2, left_cone = landmark1))
-        """
+        
                     
         if(len(waypoints) > 3):
             return waypoints
