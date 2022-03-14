@@ -24,41 +24,19 @@ UNKNOWN_CONE_STYLE = rospy.get_param("planner/unknown_cone_style", 4)
 
 rospy.init_node('path_planning_airsim_mediator')
 
-cones_pub = rospy.Publisher(MAP_TOPIC, LandmarkArray, queue_size=1)
-pose_pub = rospy.Publisher(POSE_TOPIC, Odometry, queue_size=1)
+pose_pub = rospy.Publisher(POSE_TOPIC, Odometry, queue_size = 1)
+cones_pub = rospy.Publisher(MAP_TOPIC, LandmarkArray, queue_size = 1)
 
-while not rospy.is_shutdown():
-    
-    airsim_car_pose: Odometry = rospy.wait_for_message(MEDIATOR_POSE_TOPIC, Odometry)
-    airsim_landmarks: LandmarkArray = rospy.wait_for_message(MEDIATOR_MAP_TOPIC, LandmarkArray)
-    
+def publish_odometry(airsim_car_pose):
     car_pose = airsim_car_pose
-    landmarks = airsim_landmarks
-
     pose_pub.publish(car_pose)
+
+def publish_landmarks(airsim_landmarks):
+    landmarks = airsim_landmarks
     cones_pub.publish(landmarks)
 
-    if PLOTTING:
-        path: navPath = rospy.wait_for_message(WAYPOINTS_TOPIC, navPath)
-        current_global_right_cones_x = []
-        current_global_right_cones_y = []
-        current_global_left_cones_x = []
-        current_global_left_cones_y = []
-        landmark: Landmark
-        for landmark in landmarks.landmarks:
-            if (landmark.type == YELLOW_CONE_STYLE):
-                current_global_right_cones_x.append(landmark.position.x)
-                current_global_right_cones_y.append(landmark.position.y)
-            elif (landmark.type == BLUE_CONE_STYLE):
-                current_global_left_cones_x.append(landmark.position.x)
-                current_global_left_cones_y.append(landmark.position.y)
-        plt.plot(current_global_right_cones_x, current_global_right_cones_y, 'o', color='yellow')
-        plt.plot(current_global_left_cones_x, current_global_left_cones_y, 'o', color='blue')
+pose_sub = rospy.Subscriber(MEDIATOR_POSE_TOPIC, Odometry, publish_odometry)
+cones_sub = rospy.Subscriber(MEDIATOR_MAP_TOPIC, LandmarkArray, publish_landmarks)
 
-        waypoint: PoseStamped
-        for waypoint in path.poses:
-            plt.plot(waypoint.pose.position.x, waypoint.pose.position.y, 'x')
+rospy.spin()
 
-        plt.plot(car_pose.pose.pose.position.x, car_pose.pose.pose.position.y, 'D')
-        plt.pause(0.001)
-        plt.cla()

@@ -138,6 +138,7 @@ class Map:
                 edges.append((simplex[1], simplex[2]))
         waypoints = list()
         edge: tuple
+        """
         for edge in edges:
             landmark1: Cone = landmarks[edge[0]]
             landmark2: Cone = landmarks[edge[1]]
@@ -146,6 +147,7 @@ class Map:
                     waypoints.append(Waypoint(right_cone = landmark1, left_cone = landmark2))
                 else:
                     waypoints.append(Waypoint(right_cone = landmark2, left_cone = landmark1))
+        """
                     
         if(len(waypoints) > 3):
             return waypoints
@@ -191,8 +193,8 @@ class Map:
             vector_x = second_blue_cone.x - closest_blue_cone.x
             vector_y = second_blue_cone.y - closest_blue_cone.y
             vector_mag = sqrt((vector_x ** 2) + (vector_y ** 2))
-            virtual_yellow_cone.x = closest_blue_cone.x + (3 * (vector_y / vector_mag))
-            virtual_yellow_cone.y = closest_blue_cone.y - (3 * (vector_x / vector_mag))
+            virtual_yellow_cone.x = closest_blue_cone.x - (3 * (vector_y / vector_mag))
+            virtual_yellow_cone.y = closest_blue_cone.y + (3 * (vector_x / vector_mag))
             virtual_yellow_cone.color = YELLOW_CONE_STYLE
             virtual_yellow_cone.color_confidence = 1.0 
             waypoints.append(Waypoint(right_cone = virtual_yellow_cone, left_cone = closest_blue_cone))
@@ -212,8 +214,8 @@ class Map:
             vector_x = second_yellow_cone.x - closest_yellow_cone.x
             vector_y = second_yellow_cone.y - closest_yellow_cone.y
             vector_mag = sqrt((vector_x ** 2) + (vector_y ** 2))
-            virtual_blue_cone.x = closest_yellow_cone.x - (3 * (vector_y / vector_mag))
-            virtual_blue_cone.y = closest_yellow_cone.y + (3 * (vector_x / vector_mag))
+            virtual_blue_cone.x = closest_yellow_cone.x + (3 * (vector_y / vector_mag))
+            virtual_blue_cone.y = closest_yellow_cone.y - (3 * (vector_x / vector_mag))
             virtual_blue_cone.color = BLUE_CONE_STYLE
             virtual_blue_cone.color_confidence = 1.0 
             waypoints.append(Waypoint(right_cone = closest_yellow_cone, left_cone = virtual_blue_cone))
