@@ -25,11 +25,11 @@ waypoints_pub = rospy.Publisher(WAYPOINTS_TOPIC, navPath, queue_size=1)
 
 while not rospy.is_shutdown():
     
-    car_pose: Odometry = rospy.wait_for_message(POSE_TOPIC, Odometry)
     landmark_array: LandmarkArray = rospy.wait_for_message(MAP_TOPIC, LandmarkArray)
+    car_pose: Odometry = rospy.wait_for_message(POSE_TOPIC, Odometry)
 
     map_object = Map(landmark_array.landmarks, car_pose.pose.pose) #map object, totally unrelated to python's map function
-
+    
     best_path: Path = map_object.get_path()
     output_path = navPath()
     if (best_path == None):

@@ -56,6 +56,8 @@ class Map:
         paths: SimpleQueue = SimpleQueue() #queue to store possible paths
         #Get waypoints in range of car (at appropriate distance and appropriate angle) to use as starting point for path search
         starting_waypoints: list = self.filter_local(self.waypoints, self.pose, WAYPOINT_FIELD_OF_VIEW, WAYPOINT_DISTANCE)
+        if(len(starting_waypoints) == 0):
+            starting_waypoints: list = self.filter_local(self.waypoints, self.pose, WAYPOINT_FIELD_OF_VIEW, WAYPOINT_DISTANCE * 2)
         waypoint: Waypoint
         for waypoint in starting_waypoints:
             new_path: Path = Path([waypoint])
@@ -144,7 +146,10 @@ class Map:
                     waypoints.append(Waypoint(right_cone = landmark1, left_cone = landmark2))
                 else:
                     waypoints.append(Waypoint(right_cone = landmark2, left_cone = landmark1))
-
+                    
+        if(len(waypoints) > 3):
+            return waypoints
+        
         #Add extra waypoints constructed from like-colored cones
         blue_cones = list()
         yellow_cones = list()
