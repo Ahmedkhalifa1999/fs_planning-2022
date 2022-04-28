@@ -162,23 +162,25 @@ class Map:
             elif (landmark.color == YELLOW_CONE_STYLE):
                 yellow_cones.append(landmark)
 
-        closest_blue_cone: Cone
+        closest_blue_cone: Cone = None
         for cone in blue_cones:
                 min_distance = inf
                 cone_distance = sqrt(((cone.x - pose.x) ** 2) + ((cone.y - pose.y) ** 2))
                 if (cone_distance < min_distance):
                     min_distance = cone_distance
                     closest_blue_cone = cone
-        blue_cones.remove(closest_blue_cone)
+        if (closest_blue_cone != None):
+            blue_cones.remove(closest_blue_cone)
 
-        closest_yellow_cone: Cone
+        closest_yellow_cone: Cone = None
         for cone in yellow_cones:
                 min_distance = inf
                 cone_distance = sqrt(((cone.x - pose.x) ** 2) + ((cone.y - pose.y) ** 2))
                 if (cone_distance < min_distance):
                     min_distance = cone_distance
                     closest_yellow_cone = cone
-        yellow_cones.remove(closest_yellow_cone)
+        if (closest_yellow_cone != None):
+            yellow_cones.remove(closest_yellow_cone)
 
         while (len(blue_cones) > 0):
             second_blue_cone: Cone
