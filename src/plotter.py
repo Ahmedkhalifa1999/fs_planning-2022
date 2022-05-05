@@ -42,8 +42,8 @@ while not rospy.is_shutdown():
 
     waypoint: PoseStamped
     for waypoint in path.poses:
-        plt.plot(waypoint.pose.position.x, waypoint.pose.position.y, 'x')
+        plt.plot(waypoint.pose.position.x, waypoint.pose.position.y, 'x', color='blue')
 
-    plt.plot(car_pose.pose.pose.position.x, car_pose.pose.pose.position.y, 'D')
+    plt.plot(car_pose.pose.pose.position.x, car_pose.pose.pose.position.y, 'D', color='black')
     plt.pause(0.001)
     plt.cla()

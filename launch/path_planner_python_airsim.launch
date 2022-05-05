@@ -25,7 +25,7 @@
     <param name="planner/mediator_pose_topic" value="airsim/KinematicOdometry"/> <!--Topic to which mediator node subscribes for pose-->
 
     <!--Cost Parameters-->
-    <param name="planner/prior_weight" value="1"/>
+    <param name="planner/prior_weight" value="0.001"/>
     <param name="planner/largest_angle_change_weight" value="1"/>
     <param name="planner/largest_angle_change_setpoint" value="0"/>
     <param name="planner/left_standard_deviation_weight" value="1"/> 
