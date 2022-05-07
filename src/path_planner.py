@@ -4,6 +4,8 @@ import tf
 import tf2_ros
 import sys
 
+import matplotlib.pyplot as plt
+
 from std_msgs.msg import Header
 from geometry_msgs.msg import PoseStamped, Pose, Point, Quaternion
 from nav_msgs.msg import Odometry, Path as navPath
@@ -25,8 +27,8 @@ UNKNOWN_CONE_STYLE = rospy.get_param("planner/unknown_cone_style", 4)
 rospy.init_node('path_planner')
 
 waypoints_pub = rospy.Publisher(WAYPOINTS_TOPIC, navPath, queue_size=1)
-broadcaster = tf2_ros.StaticTransformBroadcaster()
-static_transformStamped = nav_msgs.msg.TransformStamped()
+# broadcaster = tf2_ros.StaticTransformBroadcaster()
+# static_transformStamped = nav_msgs.msg.TransformStamped()
 
 while not rospy.is_shutdown():
     
@@ -34,6 +36,14 @@ while not rospy.is_shutdown():
     car_pose: Odometry = rospy.wait_for_message(POSE_TOPIC, Odometry)
 
     map_object = Map(landmark_array.landmarks, car_pose.pose.pose) #map object, totally unrelated to python's map function
+
+    """ 
+    waypoints_x = [waypoint.x for waypoint in Map.waypoints]
+    waypoints_y = [waypoint.y for waypoint in Map.waypoints]
+    plt.plot(waypoints_x, waypoints_y, 'o', color='red')
+    plt.pause(0.001)
+    plt.cla() 
+    """
     
     best_path: Path = map_object.get_path()
     output_path = navPath()
@@ -42,10 +52,10 @@ while not rospy.is_shutdown():
         output_path.header.frame_id = 'map'
         waypoints_pub.publish(output_path)
     else:
-        static_transformStamped.header.stamp = rospy.Time.now()
-        static_transformStamped.header.frame_id = "map"
-        static_transformStamped.child_frame_id = sys.argv[1]
+        # static_transformStamped.header.stamp = rospy.Time.now()
+        # static_transformStamped.header.frame_id = "map"
+        # static_transformStamped.child_frame_id = sys.argv[1]
         output_path.poses = [PoseStamped(Header(frame_id = 'map'), Pose(Point(x = waypoint.x, y = waypoint.y), Quaternion())) for waypoint in best_path.waypoints]
-        static_transformStamped.transform.poses = output_path.poses
-        broadcaster.sendTransform(static_transformStamped)
+        # static_transformStamped.transform.poses = output_path.poses
+        # broadcaster.sendTransform(static_transformStamped)
         waypoints_pub.publish(output_path)

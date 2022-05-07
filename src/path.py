@@ -91,6 +91,9 @@ class Path:
 
     def get_log_likelihood(self) -> float:
         log_likelihood: float = 0
+        waypoint: Waypoint
         for waypoint in self.waypoints:
-            log_likelihood = ln(waypoint.right_cone.color_confidence) + ln(waypoint.left_cone.color_confidence)
+            right_confidence = max(waypoint.right_cone.yellow_probability, waypoint.right_cone.orange_probability, 0.0001)
+            left_confidence = max(waypoint.left_cone.blue_probability, waypoint.left_cone.orange_probability, 0.0001)
+            log_likelihood = ln(right_confidence) + ln(left_confidence)
         return log_likelihood

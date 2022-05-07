@@ -8,7 +8,7 @@ from tf.transformations import euler_from_quaternion
 from scipy.spatial import Delaunay
 from queue import SimpleQueue
 
-from asurt_msgs.msg import LandmarkArray
+from asurt_msgs.msg import LandmarkArray, Landmark
 from geometry_msgs.msg import Pose
 from geometry_msgs.msg import Quaternion
 
@@ -31,6 +31,10 @@ MAX_SEARCH_ITERATIONS = rospy.get_param("planner/max_search_iterations", 10)
 PATH_QUEUE_LIMIT = rospy.get_param("planner/path_queue_limit", 8)
 MAX_WAYPOINTS_PER_PATH = rospy.get_param("planner/max_waypoints_per_path", 8)
 
+VIRTUAL_CONE_CORRECT_COLOR_PROBABILITY = 0.7
+VIRTUAL_CONE_INCORRECT_COLOR_PROBABILITY = 0.2
+VIRTUAL_CONE_ORANGE_COLOR_PROBABILITY = 0.1
+
 class Map:
     waypoints: list = list() #Private
     pose: CarPose = CarPose() #Private
@@ -38,6 +42,7 @@ class Map:
     #Public Functions
     def __init__(self, landmarks: LandmarkArray, pose: Pose):
         cones: list = [Cone(landmark) for landmark in landmarks]
+        print("created cones")
         self.pose.x = pose.position.x
         self.pose.y = pose.position.y
 
@@ -45,8 +50,10 @@ class Map:
         #self.pose.heading = pose.position.z
         self.pose.heading = self.quatrenion_to_heading(pose.orientation)
         
+        print ("set heading")
         
         cones = self.filter_local(cones, self.pose, CONE_FIELD_OF_VIEW, CONE_DISTANCE)
+        cones = Map.filter_cones(cones)
         self.waypoints = self.triangulate(cones, self.pose)
 
 
@@ -124,32 +131,29 @@ class Map:
     
     @staticmethod
     def triangulate(landmarks: list, pose: CarPose) -> list:
-        cone_array = [[landmark.x, landmark.y] for landmark in landmarks]
-        triangulation = Delaunay(cone_array)
-        simplices = triangulation.simplices
-        edges = list()
-        simplex: array
-        for simplex in simplices:
-            if (not Map.edge_in_edges(edges, (simplex[0], simplex[1]))):
-                edges.append((simplex[0], simplex[1]))
-            if (not Map.edge_in_edges(edges, (simplex[0], simplex[2]))):
-                edges.append((simplex[0], simplex[2]))
-            if (not Map.edge_in_edges(edges, (simplex[1], simplex[2]))):
-                edges.append((simplex[1], simplex[2]))
         waypoints = list()
-        edge: tuple
-        
-        for edge in edges:
-            landmark1: Cone = landmarks[edge[0]]
-            landmark2: Cone = landmarks[edge[1]]
-            if ((landmark1.color == BLUE_CONE_STYLE or landmark1.color == YELLOW_CONE_STYLE) and (landmark2.color == BLUE_CONE_STYLE or landmark2.color == YELLOW_CONE_STYLE) and (landmark1.color != landmark2.color)):
-                if (landmark1.color == YELLOW_CONE_STYLE):
-                    waypoints.append(Waypoint(right_cone = landmark1, left_cone = landmark2))
-                else:
-                    waypoints.append(Waypoint(right_cone = landmark2, left_cone = landmark1))
-        
+        if (len(landmarks) > 3):
+            cone_array = [[landmark.x, landmark.y] for landmark in landmarks]
+            triangulation = Delaunay(cone_array)
+            simplices = triangulation.simplices
+            edges = list()
+            simplex: array
+            for simplex in simplices:
+                if (not Map.edge_in_edges(edges, (simplex[0], simplex[1]))):
+                    edges.append((simplex[0], simplex[1]))
+                if (not Map.edge_in_edges(edges, (simplex[0], simplex[2]))):
+                    edges.append((simplex[0], simplex[2]))
+                if (not Map.edge_in_edges(edges, (simplex[1], simplex[2]))):
+                    edges.append((simplex[1], simplex[2]))
+
+            edge: tuple
+            for edge in edges:
+                landmark1: Cone = landmarks[edge[0]]
+                landmark2: Cone = landmarks[edge[1]]
+                waypoints.append(Waypoint(right_cone = landmark1, left_cone = landmark2))
+                waypoints.append(Waypoint(right_cone = landmark2, left_cone = landmark1))
                     
-        if(len(waypoints) > 3):
+        if(len(waypoints) > 8):
             return waypoints
         
         #Add extra waypoints constructed from like-colored cones
@@ -198,7 +202,9 @@ class Map:
             virtual_yellow_cone.x = closest_blue_cone.x - (3 * (vector_y / vector_mag))
             virtual_yellow_cone.y = closest_blue_cone.y + (3 * (vector_x / vector_mag))
             virtual_yellow_cone.color = YELLOW_CONE_STYLE
-            virtual_yellow_cone.color_confidence = 1.0 
+            virtual_yellow_cone.yellow_probability = VIRTUAL_CONE_CORRECT_COLOR_PROBABILITY
+            virtual_yellow_cone.blue_probability = VIRTUAL_CONE_INCORRECT_COLOR_PROBABILITY
+            virtual_yellow_cone.orange_probability = VIRTUAL_CONE_ORANGE_COLOR_PROBABILITY
             waypoints.append(Waypoint(right_cone = virtual_yellow_cone, left_cone = closest_blue_cone))
             blue_cones.remove(second_blue_cone)
             closest_blue_cone = second_blue_cone
@@ -219,7 +225,9 @@ class Map:
             virtual_blue_cone.x = closest_yellow_cone.x + (3 * (vector_y / vector_mag))
             virtual_blue_cone.y = closest_yellow_cone.y - (3 * (vector_x / vector_mag))
             virtual_blue_cone.color = BLUE_CONE_STYLE
-            virtual_blue_cone.color_confidence = 1.0 
+            virtual_blue_cone.blue_probability = VIRTUAL_CONE_CORRECT_COLOR_PROBABILITY
+            virtual_blue_cone.yellow_probability = VIRTUAL_CONE_INCORRECT_COLOR_PROBABILITY
+            virtual_blue_cone.orange_probability = VIRTUAL_CONE_ORANGE_COLOR_PROBABILITY 
             waypoints.append(Waypoint(right_cone = closest_yellow_cone, left_cone = virtual_blue_cone))
             yellow_cones.remove(second_yellow_cone)
             closest_yellow_cone = second_yellow_cone
@@ -261,3 +269,15 @@ class Map:
             if ((list_edge[0] == edge[0] and list_edge[1] == edge[1]) or (list_edge[1] == edge[0] and list_edge[0] == edge[1])):
                 return True
         return False
+
+    @staticmethod
+    def filter_cones(cones: list) -> list:
+        cone1: Cone
+        cone2: Cone
+        for cone1 in cones:
+            for cone2 in cones:
+                if (cone1 != cone2):
+                    distance: float = cone1.get_distance(cone2.x, cone2.y)
+                    if distance < 0.1:
+                        cones.remove(cone2)
+        return cones
