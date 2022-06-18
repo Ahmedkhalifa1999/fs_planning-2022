@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 <launch>
-    <param name="use_sim_time" value="true"/>
+    <param name="use_sim_time" value="false"/>
 
     <!--Nodes-->
 	<node name="path_planner" pkg="fs_planning-2022" type="path_planner.py" output="screen"/>
 
     <!--Topics-->
-    <param name="planner/map_topic" value="/planner/cones"/> 
-    <param name="planner/pose_topic" value="/planner/pose"/>
-    <param name="planner/waypoints_topic" value="/planner/path"/> 
+    <param name="planner/map_topic" value="/perception/lidar/tracked_cones_lm"/>
+    <!--<param name="planner/map_topic" value="/SLAM/cones"/> -->
+    <param name="planner/waypoints_topic" value="/planning/path"/> 
 
     <!--Cones Styles-->
     <param name="planner/blue_cone_style" value="0"/>
