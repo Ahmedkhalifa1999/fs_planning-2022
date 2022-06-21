@@ -5,7 +5,7 @@ min_dist_unique: 2  # If distance between 2 waypoints is less than this, they ar
 theta_lookahead: 2.0
 
 # Interpolation Parameters
-interpolate_smoothing: 1000
+interpolate_smoothing: 10
 num_interpolation_points: 20
 
 min_observations_before_using_waypoint: 2 # A waypoint needs to be seen this number of times before being used

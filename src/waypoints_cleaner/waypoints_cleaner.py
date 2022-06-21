@@ -24,7 +24,9 @@ class WaypointsCleaner:
     A 3rd order spline is fitted to the extracted points while smoothness is increased (a parameter)
     A set of equally distanced N (self.num_waypoints_return) waypoints are extracted from the spline and returned
     '''
-    def __init__(self,param_path=None):
+    def __init__(self, to_rear, param_path=None):
+        self.to_rear = np.array(to_rear)
+
         if param_path is None:
             dirname = os.path.dirname(__file__)
             param_path = os.path.join(dirname, 'params.yaml')
@@ -40,7 +42,6 @@ class WaypointsCleaner:
         self.curr_pos = np.zeros(2)
         self.smooth_prev = np.zeros((1,2))
         self.curr_heading = 0
-        self.previous_waypoints = []
         self.prev_waypoints = []
         self.prev_done_waypoints = []
         self.passed_waypoints = []
@@ -83,7 +84,6 @@ class WaypointsCleaner:
         waypoints = (rot_mat@waypoints.transpose()).transpose()
         waypoints = np.array(waypoints) + self.curr_pos.reshape(1,2)
 
-        self.previous_waypoints.append(waypoints)
         positions = []
         for waypoint in self.prev_waypoints:
             positions.append(waypoint.get())
@@ -102,7 +102,11 @@ class WaypointsCleaner:
                 
         
     def get_ordered_waypoints(self,waypoints):
-        ordered_waypoints = [self.curr_pos]
+        s, c = np.sin(self.curr_heading), np.cos(self.curr_heading)
+        rot_mat = np.array([[c,-s],[s,c]]) # to check
+        vec_rear = (rot_mat@self.to_rear.transpose()).transpose()
+        rear_pos = self.curr_pos + vec_rear
+        ordered_waypoints = [rear_pos, self.curr_pos]
         curr_waypoint = self.curr_pos
         while waypoints.shape[0]>0:
             dists = np.linalg.norm(waypoints-curr_waypoint,axis=1)  # shape=N
@@ -118,7 +122,7 @@ class WaypointsCleaner:
             
     
     def fit_spline(self,waypoints):
-        k = 3
+        k = 2
         if waypoints.shape[0]<4:
             k = waypoints.shape[0]-1
             
@@ -170,16 +174,14 @@ class WaypointsCleaner:
         
         ordered_waypoints = self.get_ordered_waypoints(waypoints_to_use)
 
-        return ordered_waypoints
-
         new_waypoints = self.fit_spline(ordered_waypoints)
         if new_waypoints.shape[0]<4: return new_waypoints
         
-        # print(new_waypoints.shape)
-        # return []
         ac_spline = ArcLengthSpline(num_samples=10,arclength_dt=0.1)
-        #print(new_waypoints)
         ac_spline.fit_spline(new_waypoints[:,0],new_waypoints[:,1])
+        all_waypoints = ac_spline.get_points()
+        return all_waypoints
+
         x,y = ac_spline.evaluate(self.theta_lookahead)
         next_waypoint = np.array([[x,y]])
         smoothed = next_waypoint*(1-self.exp_param) + self.exp_param*self.smooth_prev
@@ -193,8 +195,6 @@ class WaypointsCleaner:
             plt.ylim([-100,100])
             plt.plot(new_waypoints[:,0],new_waypoints[:,1],c='c')
             plt.scatter(waypoints_to_use[:,0],waypoints_to_use[:,1],c='g',marker='x')
-            previous_waypoints = np.array(self.previous_waypoints[-1])
-            plt.scatter(previous_waypoints[:,0],previous_waypoints[:,1],c='r',marker='x')
             plt.scatter(smoothed[:,0],smoothed[:,1],c='k',marker='^')
             plt.pause(0.05)
         

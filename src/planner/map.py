@@ -20,7 +20,7 @@ class Map:
         
     def get_path(self) -> Path:
         if len(self.waypoints) == 0 or self.cones.shape[0]==0:
-            return [Waypoint(0.1,0)], []
+            return None  # To fix
             
         paths = []
         costs = []

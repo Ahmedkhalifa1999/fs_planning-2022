@@ -37,5 +37,7 @@ class Planner:
         map_object = Map(self.landmarks)
         best_path = map_object.get_path()
 
+        self.landmarks = None
+
         # Waypoints Cleaner
         return best_path

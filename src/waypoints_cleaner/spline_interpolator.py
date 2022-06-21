@@ -99,7 +99,7 @@ class ArcLengthSpline:
         # Fit using resampled points
         self.x_spline.fit(new_t_vals,new_x_points)
         self.y_spline.fit(new_t_vals,new_y_points)
-        self.t_points = new_t_vals
+        self.t_points = np.array(new_t_vals)
         self.x_coeffs = self.x_spline.coeffs
         self.y_coeffs = self.y_spline.coeffs
 
@@ -201,3 +201,12 @@ class ArcLengthSpline:
         t_vals = np.array(t_vals)
 
         return arclengths, t_vals
+    
+    def get_points(self):
+        lengths, _ = self.compute_total_arclength()
+        total_length = np.sum(lengths)
+        points = []
+        for theta in np.arange(0,total_length, self.arclength_dt):
+            pos = self.evaluate(theta)
+            points.append(pos)
+        return np.array(points)

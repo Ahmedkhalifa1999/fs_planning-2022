@@ -13,30 +13,31 @@ from planner import *
 from waypoints_cleaner import WaypointsCleaner
 from tf_helper import *
 
-landmark_array = None
-planner_py = Planner()
-def perception_callback(data):
-    global landmark_array, planner_py, tf_help
-    landmark_array = data
-    planning_frame_id = "velodyne"
-    landmarks = tf_help.get_message_in(landmark_array, planning_frame_id)
+
+def perception_callback(landmark_array):
+    global planner_py, tf_help
+    landmarks = tf_help.get_message_in(landmark_array, "velodyne")
     planner_py.landmark_cb(landmarks)
 
 
 def main():
-    global tf_help
+    global planner_py, tf_help
     rospy.init_node('path_planner')
+    status = Status_Publisher('/status/planning')
+    status.starting()
+    
+    planner_py = Planner()
 
     MAP_TOPIC = rospy.get_param("planner/map_topic")
     WAYPOINTS_TOPIC = rospy.get_param("planner/waypoints_topic")
-    planning_frame_id = "velodyne"
-    output_frame_id = "base_link"
     tf_help = TF_Helper("planning")
 
     rospy.Subscriber(MAP_TOPIC, LandmarkArray, perception_callback)
     waypoints_pub = rospy.Publisher(WAYPOINTS_TOPIC, navPath, queue_size=1)
-    cleaner = WaypointsCleaner()
-
+    
+    to_rear = tf_help.get_transform("rear_link", "velodyne")
+    cleaner = WaypointsCleaner(to_rear[0])
+    status.ready()
 
     rate = rospy.Rate(20)
     
@@ -44,26 +45,24 @@ def main():
         rate.sleep()
 
         pose = tf_help.get_transform("velodyne", "map")
-        if landmark_array is None or pose is None:
+        if pose is None:
             continue
 
         best_path = planner_py.run()
         cleaner.update_position(*pose)
 
-        if best_path is None:
-            rospy.loginfo("No Path Found")
+        if best_path is None: # No path found
             continue
 
-        waypoints = np.array([[w.x,w.y] for w in best_path.waypoints[1:]])
+        waypoints = np.array([[w.x,w.y] for w in best_path.waypoints])
         cleaner.add_waypoints(waypoints[1:])
         new_waypoints = cleaner.get_waypoints()
         
         # Create and publish message
         output_path = create_path_message(new_waypoints, "map")
-        #output_path = create_path_message(waypoints, "velodyne")
-        output_path = tf_help.get_message_in(output_path, output_frame_id)
-        #output_path = add_start_waypoint(output_path)
+        output_path = tf_help.get_message_in(output_path, "rear_link")
         waypoints_pub.publish(output_path)
+        status.running()
 
 if __name__ == '__main__':
     main()
