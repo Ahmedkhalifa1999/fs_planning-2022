@@ -10,6 +10,8 @@
     <!--<param name="planner/map_topic" value="/SLAM/cones"/> -->
     <param name="planner/waypoints_topic" value="/planning/path"/> 
 
+    <param name="planner/use_cleaner" value="True"/>
+
     <!--Cones Styles-->
     <param name="planner/blue_cone_style" value="0"/>
     <param name="planner/yellow_cone_style" value="1"/>

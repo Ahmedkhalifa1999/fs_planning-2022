@@ -1,7 +1,7 @@
 num_waypoints_return: 2  # Number of equally distanced waypoints on the path to extract and return
 num_frames_use: 5  # Number of frames from the past to use waypoints from
 euclidean_dist_outlier: 10  # If distance to a waypoints is this, it is rejected (taken as an outlier)
-min_dist_unique: 2  # If distance between 2 waypoints is less than this, they are combined
+min_dist_unique: 1  # If distance between 2 waypoints is less than this, they are combined
 theta_lookahead: 2.0
 
 # Interpolation Parameters

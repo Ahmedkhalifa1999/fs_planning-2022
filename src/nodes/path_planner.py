@@ -30,6 +30,7 @@ def main():
 
     MAP_TOPIC = rospy.get_param("planner/map_topic")
     WAYPOINTS_TOPIC = rospy.get_param("planner/waypoints_topic")
+    use_cleaner = rospy.get_param("planner/use_cleaner")
     tf_help = TF_Helper("planning")
 
     rospy.Subscriber(MAP_TOPIC, LandmarkArray, perception_callback)
@@ -44,22 +45,23 @@ def main():
     while not rospy.is_shutdown():
         rate.sleep()
 
-        pose = tf_help.get_transform("velodyne", "map")
-        if pose is None:
-            continue
-
         best_path = planner_py.run()
-        cleaner.update_position(*pose)
 
         if best_path is None: # No path found
             continue
 
         waypoints = np.array([[w.x,w.y] for w in best_path.waypoints])
-        cleaner.add_waypoints(waypoints[1:])
-        new_waypoints = cleaner.get_waypoints()
-        
-        # Create and publish message
-        output_path = create_path_message(new_waypoints, "map")
+
+        pose = tf_help.get_transform("velodyne", "map")
+        if use_cleaner and not pose is None:
+            cleaner.update_position(*pose)
+            cleaner.add_waypoints(waypoints[1:])
+            waypoints = cleaner.get_waypoints()
+            output_path = create_path_message(waypoints, "map")
+        else:
+            output_path = create_path_message(waypoints, "velodyne")
+
+        # Publish message
         output_path = tf_help.get_message_in(output_path, "rear_link")
         waypoints_pub.publish(output_path)
         status.running()
