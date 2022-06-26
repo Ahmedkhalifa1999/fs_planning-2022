@@ -6,11 +6,11 @@
 	<node name="path_planner" pkg="fs_planning-2022" type="path_planner.py" output="screen"/>
 
     <!--Topics-->
-    <param name="planner/map_topic" value="/perception/lidar/tracked_cones_lm"/>
+    <param name="planner/map_topic" value="/perception/smornn/detected_cones_lm"/>
     <!--<param name="planner/map_topic" value="/SLAM/cones"/> -->
     <param name="planner/waypoints_topic" value="/planning/path"/> 
 
-    <param name="planner/use_cleaner" value="True"/>
+    <param name="planner/use_cleaner" value="False"/>
 
     <!--Cones Styles-->
     <param name="planner/blue_cone_style" value="0"/>

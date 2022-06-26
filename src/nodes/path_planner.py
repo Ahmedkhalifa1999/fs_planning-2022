@@ -62,7 +62,7 @@ def main():
             output_path = create_path_message(waypoints, "velodyne")
 
         # Publish message
-        output_path = tf_help.get_message_in(output_path, "rear_link")
+        output_path = tf_help.get_message_in(output_path, "kit")
         waypoints_pub.publish(output_path)
         status.running()
 
