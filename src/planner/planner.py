@@ -22,8 +22,9 @@ def landmark_objects(landmarks):
     return landmark_objs
 
 class Planner:
-    def __init__(self):
+    def __init__(self, planning_frame):
         self.landmarks = None
+        self.planning_frame = planning_frame
 
     @mutex_lock(mutex)
     def landmark_cb(self, landmarks):
@@ -38,6 +39,9 @@ class Planner:
         best_path = map_object.get_path()
 
         self.landmarks = None
+        possible_waypoints = []
+        for p in map_object.waypoints:
+            possible_waypoints.append([p.x,p.y])
 
         # Waypoints Cleaner
-        return best_path
+        return best_path, np.array(possible_waypoints)

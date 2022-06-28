@@ -93,7 +93,7 @@ class WaypointsCleaner:
             if positions.shape[0]>0:
                 dists = np.linalg.norm(positions-waypoint,axis=1)  # shape=N
                 min_dist, min_dist_idx = np.min(dists), np.argmin(dists)
-                if min_dist < 2.5:
+                if min_dist < self.min_dist_unique:
                     self.prev_waypoints[min_dist_idx].add_reading(waypoint)
                 else:
                     self.prev_waypoints.append(Waypoint(waypoint))
@@ -171,7 +171,6 @@ class WaypointsCleaner:
             return np.array([])
             
         # TODO: Outlier removal using perpendicular distance to the previously fitted spline
-        
         ordered_waypoints = self.get_ordered_waypoints(waypoints_to_use)
 
         new_waypoints = self.fit_spline(ordered_waypoints)

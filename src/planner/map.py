@@ -43,7 +43,7 @@ class Map:
                 paths = paths[1:]
                 cost = costs[0]
                 costs = costs[1:]
-                if len(current_path.waypoints) > 3:
+                if len(current_path.waypoints) > MAX_WAYPOINTS_PER_PATH:
                     paths.append(current_path) # TODO: can put in another list to prevent reiterating
                     costs.append(cost)
                     continue
@@ -54,7 +54,8 @@ class Map:
                 added_point = False
                 for waypoint in current_possible_waypoints:
                     if waypoint not in current_path.waypoints:
-                        new_path: Path = Path(self.cones, self.color_probs, deepcopy(current_path.waypoints))
+                        #new_path: Path = Path(self.cones, self.color_probs, deepcopy(current_path.waypoints))
+                        new_path = deepcopy(current_path)
                         #if len(paths)
                         tic = time()
                         new_path.add_waypoint(waypoint.x, waypoint.y)
@@ -85,6 +86,7 @@ class Map:
                 break
 
         best_path = paths[np.argmin(costs)]
+        #print(best_path.get_cost(verbose=True)[3:5])
         # print("-----------")
         # print(c, cost_time, cost_time/c)
 
@@ -100,7 +102,7 @@ class Map:
         for landmark in landmarks:
             landmark_distance = np.sqrt(((landmark.x-x) ** 2) + ((landmark.y-y) ** 2))
             heading_to_landmark = np.arctan2(landmark.y-y, landmark.x-x)
-            heading_diff = abs(heading_to_landmark-heading)%(2*np.pi) - np.pi  # abs + -pi to pi
+            heading_diff = abs(heading_to_landmark-heading - np.pi)%(2*np.pi) - np.pi  # abs + -pi to pi
             if landmark_distance < distance and heading_diff*180/3.14 < (field_of_view/2):
                     filtered_landmarks.append(landmark)
         return filtered_landmarks
@@ -129,8 +131,9 @@ class Map:
                 w = np.array([x,y])
                 dist = np.sqrt((x-landmark1.x)**2+(x-landmark1.y)**2)
                 dists2 = np.linalg.norm(np.array(cone_array).reshape(-1,2)-w.reshape(1,2), axis=1)
+                # Add dists3
                 m = np.min(dists2)
-                if dist < TRACKWIDTH/2 + 2 and m > 0.5:
+                if dist < TRACKWIDTH/2 + 2 and m > DIST_TRIANGULATE2:
                     waypoints_obj.append(Waypoint(x, y))
                     waypoints_arr.append([x,y])
         except:

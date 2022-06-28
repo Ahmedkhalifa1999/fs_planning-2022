@@ -1,7 +1,7 @@
 num_waypoints_return: 2  # Number of equally distanced waypoints on the path to extract and return
 num_frames_use: 5  # Number of frames from the past to use waypoints from
-euclidean_dist_outlier: 4  # If distance to a waypoints is this, it is rejected (taken as an outlier)
-min_dist_unique: 1  # If distance between 2 waypoints is less than this, they are combined
+euclidean_dist_outlier: 6  # If distance to a waypoints is this, it is rejected (taken as an outlier)
+min_dist_unique: 2  # If distance between 2 waypoints is less than this, they are combined
 theta_lookahead: 2.0
 
 # Interpolation Parameters
@@ -11,12 +11,10 @@ num_interpolation_points: 20
 min_observations_before_using_waypoint: 2 # A waypoint needs to be seen this number of times before being used
 
 # Num Readings filter
-max_num_readings: 10  # Number of readings for each waypoint is clipped at the max value
-mean_num_readings_slack: 1
+max_num_readings: 15  # Number of readings for each waypoint is clipped at the max value
+mean_num_readings_slack: 3
 
 # Front of car filter
-filter_behind_car: False
-
-exp_param: 0.2  # Smoothing next waypoint
+filter_behind_car: True
 
 plot: False

@@ -166,7 +166,7 @@ class Path:
         
         return np.where(right_side==0)[0], np.where(right_side==1)[0]
         
-    def get_cost(self) -> float:
+    def get_cost(self, verbose=False) -> float:
         # TODO: normalize each cost
         cost: float = 0
         angle_change = self.get_largest_angle_change()
@@ -198,6 +198,11 @@ class Path:
         cost += TRACK_WIDTH_WEIGHT * (avg_width_loss)
         blue_color_cost = self.color_cost(left_idx)
         yellow_color_cost = self.color_cost(right_idx, False)
+        if verbose:
+            print(left_units)
+            print(left_idx)
+            print(self.cones[left_idx])
+            print(self.color_probs)
 
         # length, max_dist = self.get_path_length()
         # cost += max_dist*MAX_DIST_WEIGHT

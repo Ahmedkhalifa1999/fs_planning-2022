@@ -6,41 +6,10 @@
 	<node name="path_planner" pkg="fs_planning-2022" type="path_planner.py" output="screen"/>
 
     <!--Topics-->
-    <param name="planner/map_topic" value="/perception/smornn/detected_cones_lm"/>
-    <!--<param name="planner/map_topic" value="/SLAM/cones"/> -->
+    <!--<param name="planner/map_topic" value="/perception/smornn/detected_cones_lm"/>-->
+    <param name="planner/map_topic" value="/SLAM/cones"/>
     <param name="planner/waypoints_topic" value="/planning/path"/> 
 
-    <param name="planner/use_cleaner" value="False"/>
-
-    <!--Cones Styles-->
-    <param name="planner/blue_cone_style" value="0"/>
-    <param name="planner/yellow_cone_style" value="1"/>
-    <param name="planner/orange_cone_style" value="2"/>
-    <param name="planner/big_cone_style" value="3"/>
-    <param name="planner/unkown_cone_style" value="4"/>
-
-    <!--Cost Parameters-->
-    <param name="planner/prior_weight" value="1"/>
-    <param name="planner/largest_angle_change_weight" value="1"/>
-    <param name="planner/largest_angle_change_setpoint" value="0"/>
-    <param name="planner/left_standard_deviation_weight" value="1"/> 
-    <param name="planner/left_standard_deviation_setpoint" value="0"/> 
-    <param name="planner/right_standard_deviation_weight" value="1"/> 
-    <param name="planner/right_standard_deviation_setpoint" value="0"/> 
-    <param name="planner/track_width_standard_deviation_weight" value="1"/> 
-    <param name="planner/track_width_standard_deviation_setpoint" value="0"/> 
-    <param name="planner/number_of_edges_crossed_weight" value="100"/> 
-    <param name="planner/planner/number_of_edges_crossed_setpoint" value="5"/> 
-    <param name="planner/path_length_weight" value="20"/> 
-    <param name="planner/path_length_setpoint" value="20"/> 
-
-    <!--Path Finder Parameters-->
-    <param name="planner/cone_field_of_view" value="180"/>
-    <param name="planner/cone_distance" value="20"/>
-    <param name="planner/waypoint_field_of_view" value="180"/>
-    <param name="planner/waypoint_distance" value="6"/> 
-    <param name="planner/path_queue_limit" value="10"/> 
-    <param name="planner/max_waypoints_per_path" value="10"/> 
-
+    <param name="planner/use_cleaner" value="True"/>
 </launch>
 
