@@ -1,0 +1,164 @@
+{
+ "cone_msgs_sent": 100,
+ "paths_received": 60,
+ "statuses": [
+  "ready",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running",
+  "running"
+ ],
+ "samples": [
+  {
+   "t": 1789735261.6860943,
+   "frame": "kit",
+   "n": 4,
+   "pts": [
+    [
+     -0.5,
+     0.0
+    ],
+    [
+     1.5,
+     0.0
+    ],
+    [
+     2.75,
+     0.0
+    ],
+    [
+     4.0,
+     0.0
+    ]
+   ]
+  },
+  {
+   "possible": 65
+  },
+  {
+   "t": 1789735261.7261453,
+   "frame": "kit",
+   "n": 4,
+   "pts": [
+    [
+     -0.5,
+     0.0
+    ],
+    [
+     1.4,
+     0.0
+    ],
+    [
+     3.9,
+     0.0
+    ],
+    [
+     6.4,
+     0.1
+    ]
+   ]
+  },
+  {
+   "t": 1789735267.4025352,
+   "frame": "kit",
+   "n": 4,
+   "pts": [
+    [
+     -0.5,
+     0.0
+    ],
+    [
+     0.7,
+     0.0
+    ],
+    [
+     3.2,
+     0.1
+    ],
+    [
+     5.7,
+     0.1
+    ]
+   ]
+  },
+  {
+   "t": 1789735267.4976685,
+   "frame": "kit",
+   "n": 4,
+   "pts": [
+    [
+     -0.5,
+     0.0
+    ],
+    [
+     0.6,
+     0.0
+    ],
+    [
+     3.1,
+     0.0
+    ],
+    [
+     5.6,
+     0.1
+    ]
+   ]
+  }
+ ]
+}

@@ -1,0 +1,41 @@
+... logging to /tmp/claude-0/-home-user-fs-planning-2022/41fa66e9-9fde-52b0-90c4-f7a30e9a4756/scratchpad/ros_home/log/c2fe33e8-b35d-11f1-bec8-02fc00000001/roslaunch-vm-6142.log
+Checking log directory for disk usage. This may take a while.
+Press Ctrl-C to interrupt
+Done checking log file disk usage. Usage is <1GB.
+]2;/tmp/claude-0/-home-user-fs-planning-2022/41fa66e9-9fde-52b0-90c4-f7a30e9a4756/scratchpad/ws/src/fs_planning-2022/launch/path_planner_python.launch
+[1mstarted roslaunch server http://vm:36465/[0m
+
+SUMMARY
+========
+
+PARAMETERS
+ * /planner/map_topic: /SLAM/cones
+ * /planner/use_cleaner: True
+ * /planner/waypoints_topic: /planning/path
+ * /rosdistro: noetic
+ * /rosversion: 1.17.0
+ * /use_sim_time: False
+
+NODES
+  /
+    path_planner (fs_planning-2022/path_planner.py)
+
+[1mROS_MASTER_URI=http://localhost:11311[0m
+]2;/tmp/claude-0/-home-user-fs-planning-2022/41fa66e9-9fde-52b0-90c4-f7a30e9a4756/scratchpad/ws/src/fs_planning-2022/launch/path_planner_python.launch http://localhost:11311
+[1mprocess[path_planner-1]: started with pid [6158][0m
+[WARN] [1789735075.870547]: [tf_helper stub] rear_link -> base_link unavailable: "base_link" passed to lookupTransform argument target_frame does not exist. 
+Traceback (most recent call last):
+  File "/tmp/claude-0/-home-user-fs-planning-2022/41fa66e9-9fde-52b0-90c4-f7a30e9a4756/scratchpad/ws/devel/lib/fs_planning-2022/path_planner.py", line 15, in <module>
+    exec(compile(fh.read(), python_script, 'exec'), context)
+  File "/tmp/claude-0/-home-user-fs-planning-2022/41fa66e9-9fde-52b0-90c4-f7a30e9a4756/scratchpad/ws/src/fs_planning-2022/src/nodes/path_planner.py", line 77, in <module>
+    main()
+  File "/tmp/claude-0/-home-user-fs-planning-2022/41fa66e9-9fde-52b0-90c4-f7a30e9a4756/scratchpad/ws/src/fs_planning-2022/src/nodes/path_planner.py", line 42, in main
+    cleaner = WaypointsCleaner(to_rear[0])
+                               ~~~~~~~^^^
+TypeError: 'NoneType' object is not subscriptable
+[31m[path_planner-1] process has died [pid 6158, exit code 1, cmd /tmp/claude-0/-home-user-fs-planning-2022/41fa66e9-9fde-52b0-90c4-f7a30e9a4756/scratchpad/ws/devel/lib/fs_planning-2022/path_planner.py __name:=path_planner __log:=/tmp/claude-0/-home-user-fs-planning-2022/41fa66e9-9fde-52b0-90c4-f7a30e9a4756/scratchpad/ros_home/log/c2fe33e8-b35d-11f1-bec8-02fc00000001/path_planner-1.log].
+log file: /tmp/claude-0/-home-user-fs-planning-2022/41fa66e9-9fde-52b0-90c4-f7a30e9a4756/scratchpad/ros_home/log/c2fe33e8-b35d-11f1-bec8-02fc00000001/path_planner-1*.log[0m
+all processes on machine have died, roslaunch will exit
+shutting down processing monitor...
+... shutting down processing monitor complete
+[1mdone[0m
